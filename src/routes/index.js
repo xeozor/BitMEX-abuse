@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import firebase from 'firebase'
 import Login from '../components/Login'
 import Register from '../components/Register'
 import Dashboard from '../components/Dashboard'
 
-Vue.use(Router)
+Vue.use(Router)  
 
 const router = new Router({
     mode: 'history',
@@ -23,9 +24,21 @@ const router = new Router({
     {
         path: '/dashboard',
         name: 'Dashboard',
-        component: Dashboard
+        component: Dashboard,
+        meta: {
+            requiresAuth: true
+        }
     }
 ]
+});
+
+router.beforeEach(async (to, from, next) => {
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+    if (requiresAuth && !await firebase.getCurrentUser()){
+      next('login');
+    }else{
+      next();
+    }
 });
 
 export default router
